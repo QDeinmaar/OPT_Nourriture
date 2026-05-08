@@ -19,7 +19,7 @@ ingredients = {
     }
 }
 
-requirement = {
+requirements = {
     "total_weight": 100,
     "min_protein": 18
 }
