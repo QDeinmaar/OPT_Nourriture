@@ -2,46 +2,55 @@ from pulp import *
 from data import ingredients, requirements
 
 def optimize_feed():
-    problem = LpProblem("Animal_feed_optimizer", LpMinimize)
 
-    variables = {}
+    problem = LpProblem("Animal_Feed_Optimization", LpMinimize)
+
+    x = {
+        i: LpVariable(i, lowBound=0)
+        for i in ingredients
+    }
 
     for i in ingredients:
-        variables[i] = LpVariable(i, lowBound=0)
+        problem += x[i] >= 1
 
+        
     problem += lpSum(
-        ingredients[i]["cost"] * variables[i]
+        ingredients[i]["cost"] * x[i]
         for i in ingredients
     )
 
-    problem += lpSum(
-        variables[i]
-        for i in ingredients
-    ) <= requirements["total_weight"]
+    problem += lpSum(x[i] for i in ingredients) == requirements["total_weight"]
 
     problem += lpSum(
-        ingredients[i]["protein"] * variables[i]
+        ingredients[i]["protein"] * x[i]
         for i in ingredients
     ) >= requirements["min_protein"]
 
     problem += lpSum(
-        ingredients[i]["energy"] * variables[i]
+        ingredients[i]["energy"] * x[i]
         for i in ingredients
     ) >= requirements["min_energy"]
 
-    problem += variables["soja"] >= 5
+    problem += lpSum(
+        ingredients[i]["fiber"] * x[i]
+        for i in ingredients
+    ) <= requirements["max_fiber"]
+
+    problem += lpSum(
+        ingredients[i]["cost"] * x[i]
+        for i in ingredients
+    ) <= requirements["budget"]
 
     for i in ingredients:
-        problem += variables[i] <= ingredients[i]["max_stock"]
+        problem += x[i] <= ingredients[i]["max_stock"]
 
     problem.solve()
 
-    results = {}
-
-    for i in ingredients:
-        results[i] = value(variables[i])
+    results = {
+    i: value(x[i]) for i in ingredients
+}
 
     results["cost"] = value(problem.objective)
     results["status"] = LpStatus[problem.status]
 
-    return results
+    return results, x
