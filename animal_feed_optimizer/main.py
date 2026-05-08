@@ -1,9 +1,9 @@
 from optimizer import optimize_feed
 from barchart import plot_solution
+from data import ingredients
 
 def main():
-
-    results, variables = optimize_feed()   
+    results, variables = optimize_feed()
 
     print("\n===== RESULTATS =====")
     print("Status :", results["status"])
@@ -17,7 +17,7 @@ def main():
         for i in variables
     }
 
-    plot_solution(result_plot)
+    plot_solution(result_plot, ingredients)
 
 if __name__ == "__main__":
     main()
