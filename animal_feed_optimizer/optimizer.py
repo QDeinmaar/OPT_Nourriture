@@ -1,13 +1,10 @@
 from pulp import *
-from animal_feed_optimizer.data import ingredients, requirements
+from data import ingredients, requirements
 
 def optimize_feed():
-    problem = LpProblem(
-        "Animal feed optimizer !",
-        LpMinimize
-    )
+    problem = LpProblem( "Animal_feed_optimizer", LpMinimize)
 
-    variables = []
+    variables = {}
 
     for ingredient in ingredients:
         variables[ingredient] = LpVariable(
@@ -21,13 +18,13 @@ def optimize_feed():
     )
 
     problem += lpSum(
-        ingredients[i] for i in ingredients
+        variables[i] for i in ingredients
     ) <= requirements["total_weight"]
 
     problem += lpSum(
-        ingredients[i]["protein"] * variables[i]
+        variables[i]["protein"] * variables[i]
         for i in ingredients
-    ) <= requirements["min_protein"]
+    ) >= requirements["min_protein"]
 
     for i in ingredients:
         problem += (
